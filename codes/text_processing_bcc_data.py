@@ -88,14 +88,18 @@ def text_processing(sentences):
 
 def stop_words_removed (sentences, stop_word_list):
     new_sentences = []
+
     for text in sentences:
-        for word in stop_word_list:
-            word_found = " " + word + " "
-            text = text.replace(word_found, " ")
-            text = text.replace("  "," ")
-        new_sentences.append(text)
-    # print(sentences[2])
-    # print(new_sentences[2])
+        filter_text=[]
+        text_split = text.split()
+        for w in text_split:
+            if w not in stop_word_list:
+                filter_text.append(w)
+        text_remove = " ".join(filter_text)
+
+        new_sentences.append(text_remove)
+    print(sentences[2])
+    print(new_sentences[2])
     return new_sentences
 
 
