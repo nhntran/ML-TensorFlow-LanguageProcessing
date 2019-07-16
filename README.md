@@ -10,6 +10,7 @@ Codes courtesy from TensorFlow in Practice Specialization by deeplearning.ai on 
 -   [6. NLP with Sarcasm Dataset](#nlp-with-sarcasm-dataset)
 -   [7. Sub word Tokenization](#sub-word-tokenization)
 -   [8. NLP - Sequence Models with Subword](#nlp---sequence-models-with-subword)
+-   [9. Text prediction using NLP](#text-prediction-using-nlp)
 
 Quick notes from the courses + codes to run in Mac terminal. If you want to learn more about TensorFlow, check out the great courses in the "TensorFlow in Practice Specialization" by deeplearning.ai on Coursera.
 
@@ -128,3 +129,8 @@ model = tf.keras.Sequential([
         tf.keras.layers.Dense(1, activation = 'sigmoid')
         ])
 ```
+
+#### 9. Text prediction using NLP
+
+-   Codes: NLP\_text\_prediction.py
+-   What you will learn: (i) Training a model based on a text dataset (ii) Predicted text based on the pattern of text in the dataset.

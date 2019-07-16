@@ -126,7 +126,7 @@ def buiding_nn_model_1D_Convolutional(corpus_size, embedding_dim,
     history = model.fit(train_data, epochs = num_epochs,
                                 validation_data = test_data)
     #after training, saving the model into the .h5 file
-    model.save('TF_NLP_sequence_model_multi.h5') 
+    model.save('TF_NLP_sequence_model_1Dconv.h5') 
 
     ## retrieve accuracy and loss values
     acc = history.history['accuracy']
@@ -183,7 +183,7 @@ def main():
     batch_size = 64
     # dimensions for the vector representing the subwords encoding
     embedding_dim = 64
-    num_epochs = 2 #number of epochs for training
+    num_epochs = 1 #number of epochs for training
 
     #import data and generate tokenizer
     tokenizer, train_data, test_data = imdb_data_import(buffer_size,
@@ -195,11 +195,11 @@ def main():
     #    train_data, test_data, num_epochs)
 
     #building model 2 - Multi layer LSTM
-    weights = buiding_nn_model_lstm_multi(corpus_size, embedding_dim,
-        train_data, test_data, num_epochs)
+    # weights = buiding_nn_model_lstm_multi(corpus_size, embedding_dim,
+    #     train_data, test_data, num_epochs)
 
-    #weights = buiding_nn_model_1D_Convolutional(corpus_size, embedding_dim,
-    #                        train_data, test_data, num_epochs)
+    weights = buiding_nn_model_1D_Convolutional(corpus_size, embedding_dim,
+                           train_data, test_data, num_epochs)
 
     # Second time running: Loading the model again
     # new_model = tf.keras.models.load_model('TF_NLP_.h5')
