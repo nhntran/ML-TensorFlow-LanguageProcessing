@@ -14,8 +14,8 @@
 
 # Download the data
 # !wget --no-check-certificate \
-#    https://storage.googleapis.com/laurencemoroney-blog.appspot.com/irish-lyrics-eof.txt \
-#    -O /tmp/irish-lyrics-eof.txt
+#     https://storage.googleapis.com/laurencemoroney-blog.appspot.com/sonnets.txt \
+#     -O data/sonnets.txt
 
 
 import tensorflow as tf
@@ -24,6 +24,7 @@ from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.layers import Embedding, LSTM, Dense, Bidirectional
 from tensorflow.keras.optimizers import Adam
+from tensorflow.keras import regularizers
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -34,7 +35,7 @@ def data_import(filename):
     corpus = data.lower().split("\n")
     tokenizer.fit_on_texts(corpus)
     corpus_size = len(tokenizer.word_index)+1
-    #print(corpus_size)
+    print(corpus_size)
     test = tokenizer.texts_to_sequences([corpus[0]])
     
     sequences =[]
@@ -58,7 +59,6 @@ def buiding_nn_model(corpus_size, embedding_dim, max_len,
         tf.keras.layers.Embedding(corpus_size, embedding_dim,
                                     input_length = max_len-1),
         tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(150)),
-        # output shape with 64 unit: (None, 128) 
         tf.keras.layers.Dense(corpus_size, activation = 'softmax'),
         ])
     model.compile(loss = 'categorical_crossentropy', optimizer = Adam(lr=0.01),
@@ -67,7 +67,7 @@ def buiding_nn_model(corpus_size, embedding_dim, max_len,
     history = model.fit(train_sequences, train_labels, epochs = num_epochs,
                                 verbose = 1)
     #after training, saving the model into the .h5 file
-    #model.save('TF_NLP_text_prediction.h5') 
+    model.save('TF_NLP_text_prediction_Shakespeare.h5') 
 
     ## retrieve accuracy and loss values
     acc = history.history['accuracy']
@@ -78,6 +78,36 @@ def buiding_nn_model(corpus_size, embedding_dim, max_len,
 
     return model
 
+def buiding_nn_model_optimization(corpus_size, embedding_dim, max_len,
+                    train_sequences, train_labels, num_epochs, drop_out_val):
+
+    model = tf.keras.Sequential([
+        tf.keras.layers.Embedding(corpus_size, embedding_dim,
+                                    input_length = max_len-1),
+        tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(150, 
+                                        return_sequences = True)),
+        tf.keras.layers.Dropout(drop_out_val),
+        tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(100)),
+        tf.keras.layers.Dense((corpus_size/2), activation = 'relu',
+            kernel_regularizer=regularizers.l2(0.01)),
+        tf.keras.layers.Dense(corpus_size, activation = 'softmax'),
+        ])
+    model.compile(loss = 'categorical_crossentropy', optimizer = "adam",
+                    metrics = ['accuracy'])
+    model.summary()
+    history = model.fit(train_sequences, train_labels, epochs = num_epochs,
+                                verbose = 1)
+    #after training, saving the model into the .h5 file
+    model.save('TF_NLP_text_prediction_Shakespeare_optimization.h5') 
+
+    ## retrieve accuracy and loss values
+    acc = history.history['accuracy']
+    loss = history.history['loss']
+
+    #evaluate the model
+    model_evaluation(acc, loss)
+
+    return model
 
 def model_evaluation(acc, loss):
     epochs = range(len(acc)) #get number of epochs
@@ -122,23 +152,32 @@ def main():
     # dimensions for the vector representing the subwords encoding
     embedding_dim = 100
     num_epochs = 100 #number of epochs for training
-    filename = 'data/irish-lyrics.txt'
-    seed_text = "I've got a good feeling"
+    drop_out_val = 0.2 #drop out 20%
+    filename = 'data/sonnets.txt'
+    seed_text = "Help me Obi Wan Kenobi, you're my only hope"
 
     tokenizer, train_sequences, train_labels,\
                         corpus_size, max_len = data_import(filename)
     
-    #model = buiding_nn_model(corpus_size, embedding_dim,
+    # model = buiding_nn_model(corpus_size, embedding_dim,
     #                max_len, train_sequences, train_labels, num_epochs)
-    # Second time running: Loading the model again
-    new_model = tf.keras.models.load_model('TF_NLP_text_prediction.h5')
+    
+    #model optimization
+    model_optimization = buiding_nn_model_optimization(corpus_size, embedding_dim,
+                max_len, train_sequences, train_labels, num_epochs, drop_out_val)
+    #Second time running: Loading the model again
+    #new_model = tf.keras.models.load_model('TF_NLP_text_prediction_Shakespeare.h5')
 
     #prediction
+    next_words =100
     #length of the prediction word: set equal to max_len
-    seed_list = seed_text.split()
-    next_words = max_len - len(seed_list)
+    # seed_list = seed_text.split()
+    # if (max_len - len(seed_list)>0):
+    #     next_words = max_len - len(seed_list)
+    # else: 
+    #     next_words = 10
 
-    text_prediction(seed_text, next_words, max_len, new_model, tokenizer)
+    text_prediction(seed_text, next_words, max_len, model, tokenizer)
 
 
 
