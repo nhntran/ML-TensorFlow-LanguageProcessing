@@ -1,17 +1,6 @@
 Deep Learning with TensorFlow - Natural Language Processing (NLP) - Tutorials
 ================
-Codes courtesy from TensorFlow in Practice Specialization by deeplearning.ai on Coursera, modified by Tran Nguyen
-
--   [1. Text Processing with Tokenizer:](#text-processing-with-tokenizer)
--   [2.Text Processing for .json Data:](#text-processing-for-.json-data)
--   [3. Tokenizing the BBC News Dataset:](#tokenizing-the-bbc-news-dataset)
--   [4. NLP with IMDB Dataset](#nlp-with-imdb-dataset)
--   [5. Word Sentiment Visualization with Embedding Projector](#word-sentiment-visualization-with-embedding-projector)
--   [6. NLP with Sarcasm Dataset](#nlp-with-sarcasm-dataset)
--   [7. Sub word Tokenization](#sub-word-tokenization)
--   [8. NLP - Sequence Models with Subword](#nlp---sequence-models-with-subword)
--   [9. Text prediction using NLP](#text-prediction-using-nlp)
--   [10. Text prediction using NLP - Shakespeare Dataset](#text-prediction-using-nlp---shakespeare-dataset)
+Codes courtesy from TensorFlow in Practice Specialization by deeplearning.ai on Coursera, modified by Tran Nguyen.
 
 Quick notes from the courses + codes to run in Mac terminal. If you want to learn more about TensorFlow, check out the great courses in the "TensorFlow in Practice Specialization" by deeplearning.ai on Coursera.
 
@@ -25,17 +14,17 @@ Ref: <https://keras.io/preprocessing/text/>
 
 \*\* Problem with the natural language processing problem: It's difficult to avoid overfitting since there will be always new data in the validation set.
 
-#### 1. Text Processing with Tokenizer:
+#### 1. Text Processing with Tokenizer
 
 -   Codes: tokenizer\_basics.py
 -   What you will learn: (i) Generating a corpus from a list of sentences using Tokenizer. (ii) Converting a list of sentences into a sequence of word index from the corpus. (iii) Using padding to get the list of all the sequences that have the same size.
 
-#### 2.Text Processing for .json Data:
+#### 2.Text Processing for .json Data
 
 -   Codes: text\_processing\_json.py
 -   What you will learn: (i) Getting data from json file and tokenize the dataset.
 
-#### 3. Tokenizing the BBC News Dataset:
+#### 3. Tokenizing the BBC News Dataset
 
 -   Codes: text\_processing\_bcc\_data.py
 -   Input: a folder 'bbc' contains 5 folders of 5 different classes (business, entertainment, politics, sport, tech). Each class has mutiple text files of news.
@@ -140,3 +129,36 @@ model = tf.keras.Sequential([
 
 -   Codes: NLP\_text\_prediction\_Shakespeare.py
 -   What you will learn: (i) Testing the model as in session 9 above. (ii) Improving the model by using: Multiple LSTM layers, drop-out, and a dense Layer including regularizers.
+
+``` r
+    model = tf.keras.Sequential([
+        tf.keras.layers.Embedding(corpus_size, embedding_dim,
+                                    input_length = max_len-1),
+        tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(150, 
+                                        return_sequences = True)),
+        tf.keras.layers.Dropout(drop_out_val),
+        tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(100)),
+        tf.keras.layers.Dense((corpus_size/2), activation = 'relu',
+            kernel_regularizer=regularizers.l2(0.01)),
+        tf.keras.layers.Dense(corpus_size, activation = 'softmax'),
+        ])
+    model.compile(loss = 'categorical_crossentropy', optimizer = "adam",
+                    metrics = ['accuracy'])
+```
+
+-   When setting learning rate lr(0.01) as in Session 9 above, the accuracy increases but too slowly =&gt; Cannot obtain good training.
+
+``` r
+model.compile(loss = 'categorical_crossentropy', optimizer = Adam(lr=0.01),
+                    metrics = ['accuracy'])
+```
+
+=&gt; Need to remove it to get good result. The optimize default learning rate for Adam lr=0.001 (see the plots below for details)
+
+-   Accuracy plot comparing the single layer LSTM model; the optimized model with multilayer LSTM + dropout + regularizers (while keeping the learning rate as in the single layer LSTM, lr=0.01); and the optimized model with the default learning rate for "adam", lr=0.001.
+
+<img src="./img/NLP_textprediction_accuracy.png" width="1875" style="display: block; margin: auto;" />
+
+-   Loss plot
+
+<img src="./img/NLP_text_prediction_loss.png" width="1827" style="display: block; margin: auto;" />
